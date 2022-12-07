@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react'
 
 const Question = () => {
     const [question, setQuestion] = useState([])
+    const [respons, setRespons] = useState([])
     const [ques, setQues] = useState()
     useEffect(() => {
         fetch('https://opentdb.com/api.php?amount=20&category=10&difficulty=easy&type=multiple').then(res => res.json())
             .then(
                 (result) => {
-                    const questions = result.results.map((el, index) => ({ ...el, count: index + 1, status: "not" }))
+                    const questions = result.results.map((el, index) => ({ ...el, count: index + 1, }))
                     setQuestion(questions)
                     setQues(questions?.[0])
                     console.log(questions);
@@ -18,6 +19,14 @@ const Question = () => {
             )
     }, [])
 
+    const setResponseFunc = (qno, resno) => {
+        let temp = {}
+        temp[qno] = resno
+        let temp1 = respons
+        temp1.push(temp)
+        setRespons(temp1)
+    }
+    console.log(respons)
     return (
         <>
             <div className='container bg-light '>
@@ -31,16 +40,18 @@ const Question = () => {
                             <div>
                                 <div class="form-check">
                                     <input class="form-check-input is-valid" type="radio" name="answer"
-                                        // onChange={() => { setQues(question?.[ques?.status]) }} 
+                                        // onChange={() => { setRespons(ques?.count:ques?.correct_answer) }} 
                                         id="exampleRadios1" value="option1" />
                                     <label class="form-check-label" >
                                         {ques?.correct_answer}
                                     </label>
                                 </div>
                                 {
-                                    ques?.incorrect_answers?.map((item) => {
+                                    ques?.incorrect_answers?.map((item, index) => {
                                         return <div class="form-check">
-                                            <input class="form-check-input is-valid" type="radio" name="answer" id="exampleRadios1" value="option1" />
+                                            <input class="form-check-input is-valid"
+                                                onChange={() => setResponseFunc(ques?.count, index)}
+                                                type="radio" name="answer" id="exampleRadios1" value="option1" />
                                             <label class="form-check-label" >
                                                 {item}
                                             </label>
