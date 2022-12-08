@@ -19,3 +19,11 @@ code {
 .quesCard {
   min-height: 50vh;
 }
+
+.addReview {
+  margin-top: 40% !important;
+}
+
+.navbar-brand {
+  margin-left: 15% !important;
+}

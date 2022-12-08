@@ -1,22 +1,41 @@
 import React, { useEffect, useState } from 'react'
+import { secondsToDhms } from '../utils/helper-function'
 
 const Question = () => {
-    var [questions, setQuestions] = useState([])
+    const [questions, setQuestions] = useState([])
     const [ques, setQues] = useState()
+    const [time, setTime] = useState()
+
     useEffect(() => {
         fetch('https://opentdb.com/api.php?amount=20&category=10&difficulty=easy&type=multiple').then(res => res.json())
             .then(
                 (result) => {
-                    const question = result.results.map((el, index) => ({ ...el, count: index + 1 }))
-                    setQuestions(question)
-                    setQues(question?.[0])
-                    console.log(question?.[0]);
+                    const questions = result.results.map((el, index) => ({ ...el, count: index + 1 }))
+                    setQuestions(questions)
+                    setQues(questions?.[0])
+                    if (questions?.length) {
+                        setTime(60 * questions?.length) // 60 seconds for each question
+                    }
                 },
                 (error) => {
                     console.log(error);
                 }
             )
     }, [])
+
+    const updateTime = () => {
+        if (time && typeof time === "number") {
+            if (time > 0) {
+                setTimeout(() => setTime(time - 1), 1000)
+            } else {
+                alert("Times Up")
+            }
+        }
+    }
+
+    useEffect(() => {
+        updateTime()
+    }, [time])
 
     const setAnswer = (queNo, ansNo) => {
         // console.log(queNo, ansNo, 33333333);
@@ -71,9 +90,10 @@ const Question = () => {
                                     })
                                 }
                             </div>
-                            <div className="d-flex justify-content-end">
+
+                            {ques?.status !== 'warning' && <div className="d-flex justify-content-end mt-4 addReview">
                                 <button className="btn btn-warning" onClick={setToReview}>Add to Review</button>
-                            </div>
+                            </div>}
                         </div>
                         <div className='mt-4 d-flex justify-content-between'>
                             <div className='float-left'>
@@ -82,17 +102,17 @@ const Question = () => {
                                 </button>
                             </div>
                             <br />
-                            <div className='float-right'>
+                            <div className='float-right mb-4'>
                                 <button className='btn btn-outline-success' disabled={ques?.count === questions?.length} onClick={() => { setQues(questions?.[ques?.count]) }}>
                                     Next
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div className=' col-md-4'>
-                        <div className='card text-center mb-3 rounded'>
-                            <h4 className='text-danger mt-3 '>00:20:00</h4>
-                        </div>
+                    <div className=' col-md-4 '>
+                        <h6 className='p-3 card text-center mb-3 rounded'>
+                            {secondsToDhms(time)}
+                        </h6>
                         <div className='card rounded' >
                             <div className="">
                                 {
@@ -103,7 +123,7 @@ const Question = () => {
                                         </button>
                                     ))
                                 }
-                                <div className='m-2 d-flex justify-content-between'>
+                                <div className='d-flex justify-content-between'>
                                     <div class="form-check text-success">
                                         <button className='rounded btn btn-success'>
                                             Attended
