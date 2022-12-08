@@ -15,3 +15,7 @@ code {
 .mainDiv {
   min-height: 100vh;
 }
+
+.quesCard {
+  min-height: 50vh;
+}
