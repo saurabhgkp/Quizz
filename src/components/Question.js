@@ -7,12 +7,16 @@ const Question = () => {
     const [time, setTime] = useState()
 
     useEffect(() => {
-        fetch('https://opentdb.com/api.php?amount=20&category=10&difficulty=easy&type=multiple').then(res => res.json())
+        fetch('http://localhost:4000/exam/getAllData').then(res => res.json())
             .then(
                 (result) => {
-                    const questions = result.results.map((el, index) => ({ ...el, count: index + 1 }))
+                    //  console.log(result.Data);
+                    const questions = result.Data.map((el, index) => ({ ...el, count: index + 1 }))
                     setQuestions(questions)
+                    //   console.log("=", questions);
                     setQues(questions?.[0])
+                    console.log("==", ques);
+                    console.log("==", ques.options.replace(/^\s+|\s+$/gm, ''));
                     if (questions?.length) {
                         setTime(60 * questions?.length) // 60 seconds for each question
                     }
@@ -22,7 +26,6 @@ const Question = () => {
                 }
             )
     }, [])
-
     const updateTime = () => {
         if (time && typeof time === "number") {
             if (time > 0) {
@@ -67,15 +70,15 @@ const Question = () => {
                                 {ques?.question}
                             </p>
                             <div>
-                                <div class="form-check">
+                                {/* <div class="form-check">
                                     <input class="form-check-input is-valid" type="radio" name="answer"
                                         id="exampleRadios1" value="option1" />
                                     <label class="form-check-label" >
                                         {ques?.correct_answer}
                                     </label>
-                                </div>
+                                </div> */}
                                 {
-                                    ques?.incorrect_answers?.map((item, index) => {
+                                    ques?.options?.replace(/^\s+|\s+$/gm, '').map((item, index) => {
                                         return <div class="form-check">
                                             <input class="form-check-input is-valid"
                                                 onChange={() => setAnswer(ques?.count - 1, index)}
