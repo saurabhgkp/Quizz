@@ -10,8 +10,8 @@ function App() {
       <Navbar />
       <div >
         {/* <AddQuestion /> */}
-        <Question />
-        {/* <ListData /> */}
+        {/* <Question /> */}
+        <ListData />
       </div>
 
 

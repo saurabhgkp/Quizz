@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { secondsToDhms } from '../utils/helper-function'
-
+//import {Link, useNavigate} from 'react-router-dom';
 const Question = () => {
     const [questions, setQuestions] = useState([])
     const [ques, setQues] = useState()
     const [time, setTime] = useState()
+    const [marks, setMarks] = useState()
+
+
+
+
 
     useEffect(() => {
         fetch('http://localhost:4000/exam/getAllData').then(res => res.json())
             .then(
                 (result) => {
-                    //  console.log(result.Data);
+                    // console.log(result.Data);
                     const questions = result.Data.map((el, index) => ({ ...el, count: index + 1 }))
                     setQuestions(questions)
-                    //   console.log("=", questions);
-                    setQues(questions?.[0])
-                    console.log("==", ques);
-                    console.log("==", ques.options.replace(/^\s+|\s+$/gm, ''));
+                    //  console.log("=", { ...questions?.[0], options: [questions?.[0].options1, questions?.[0].options2, questions?.[0].options3, questions?.[0].options4] });
+                    setQues({ ...questions?.[0], options: [questions?.[0].options1, questions?.[0].options2, questions?.[0].options3, questions?.[0].options4] })
+                    //   console.log("==", ques);
+                    //   console.log("==", ques.options.replace(/^\s+|\s+$/gm, ''));
                     if (questions?.length) {
                         setTime(60 * questions?.length) // 60 seconds for each question
                     }
@@ -26,6 +31,7 @@ const Question = () => {
                 }
             )
     }, [])
+
     const updateTime = () => {
         if (time && typeof time === "number") {
             if (time > 0) {
@@ -41,24 +47,38 @@ const Question = () => {
     }, [time])
 
     const setAnswer = (queNo, ansNo) => {
-        // console.log(queNo, ansNo, 33333333);
-        // let temp = questions
+        //  console.log(queNo, ansNo, 33333333);
+        let temp = questions
         // // console.log(temp[queNo].status, ansNo);
-        // temp[queNo].status = ansNo
+        temp[queNo].status = ansNo
 
         // console.log(questions, '-------------- temp hai ye')
-        const newObj = { ...questions[queNo], correctAnswerIndex: ansNo, status: "success" }
+        const newObj = { ...questions[queNo], options: [questions?.[queNo].options1, questions?.[queNo].options2, questions?.[queNo].options3, questions?.[queNo].options4], correctAnswerIndex: ansNo, status: "success" }
         setQuestions([...questions?.slice(0, queNo), newObj, ...questions?.slice(queNo + 1)])
         setQues(newObj)
     }
 
     const setToReview = () => {
         const index = ques?.count - 1
-        const newObj = { ...questions[index], status: "warning" }
+        const newObj = { ...questions[index], options: [questions?.[index].options1, questions?.[index].options2, questions?.[index].options3, questions?.[index].options4], status: "warning" }
         setQuestions([...questions?.slice(0, index), newObj, ...questions?.slice(index + 1)])
         setQues(newObj)
     }
+    // console.log("==", ques);
+    const onFinalSubmit = () => {
+        var rightAns = []
+        var attempted = []
+        questions.forEach((el) => {
+            attempted.push(el.correctAnswerIndex)
+            rightAns.push(Number(el.rightAnswer))
+        })
+        const marksSheetNew = attempted?.map((el, index) => ({ selectedAns: el, correct: el === rightAns[index] ? true : false }))
+        setMarks(marksSheetNew?.filter(el => el?.correct === true)?.length)
+        console.log(marksSheetNew, marksSheetNew?.filter(el => el?.correct === true)?.length);
+        //   navigate('/componentB',{state:{id:1,name:'sabaoon'}});
 
+
+    }
     return (
         <>
             <div className='container bg-light'>
@@ -70,15 +90,8 @@ const Question = () => {
                                 {ques?.question}
                             </p>
                             <div>
-                                {/* <div class="form-check">
-                                    <input class="form-check-input is-valid" type="radio" name="answer"
-                                        id="exampleRadios1" value="option1" />
-                                    <label class="form-check-label" >
-                                        {ques?.correct_answer}
-                                    </label>
-                                </div> */}
                                 {
-                                    ques?.options?.replace(/^\s+|\s+$/gm, '').map((item, index) => {
+                                    ques?.options?.map((item, index) => {
                                         return <div class="form-check">
                                             <input class="form-check-input is-valid"
                                                 onChange={() => setAnswer(ques?.count - 1, index)}
@@ -100,13 +113,13 @@ const Question = () => {
                         </div>
                         <div className='mt-4 d-flex justify-content-between'>
                             <div className='float-left'>
-                                <button className='btn btn-outline-primary' disabled={ques?.count === 1} onClick={() => { setQues(questions?.[ques?.count - 2]) }}>
+                                <button className='btn btn-outline-primary' disabled={ques?.count === 1} onClick={() => { setQues({ ...questions?.[ques?.count - 2], options: [questions?.[ques?.count - 2].options1, questions?.[ques?.count - 2].options2, questions?.[ques?.count - 2].options3, questions?.[ques?.count - 2].options4] }) }}>
                                     Pervious
                                 </button>
                             </div>
                             <br />
                             <div className='float-right mb-4'>
-                                <button className='btn btn-outline-success' disabled={ques?.count === questions?.length} onClick={() => { setQues(questions?.[ques?.count]) }}>
+                                <button className='btn btn-outline-success' disabled={ques?.count === questions?.length} onClick={() => { setQues({ ...questions?.[ques?.count], options: [questions?.[ques?.count].options1, questions?.[ques?.count].options2, questions?.[ques?.count].options3, questions?.[ques?.count].options4] }) }}>
                                     Next
                                 </button>
                             </div>
@@ -121,7 +134,7 @@ const Question = () => {
                                 {
                                     questions?.map((item) => (
                                         <button
-                                            className={`rounded-circle btn btn-outline-${item?.status ? item?.status : "danger"} m-2`} onClick={() => setQues(item)} >
+                                            className={`rounded-circle btn btn-outline-${item?.status ? item?.status : "danger"} m-2`} onClick={() => setQues({ ...item, options: [item.options1, item.options2, item.options3, item.options4] })} >
                                             {item?.count}
                                         </button>
                                     ))
@@ -145,7 +158,10 @@ const Question = () => {
                                 </div>
                             </div>
                         </div>
+                        <button className='btn btn-outline-primary mt-4' onClick={onFinalSubmit}> Submit</button>
                     </div>
+                    <h2 className='text-success'> You Get {marks} marks</h2>
+
                 </div>
             </div>
         </>
